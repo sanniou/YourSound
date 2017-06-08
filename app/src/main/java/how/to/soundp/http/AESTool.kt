@@ -31,8 +31,14 @@ fun encrpty(param: String): String {
         st
     }.toString()
     val keySpec = SecretKeySpec(str.substring(INPUT.length).toByteArray(), "AES")
-    Cipher.getInstance("AES/CBC/PKCS5Padding")
-            .init(1, keySpec, IvParameterSpec(IV.toByteArray()))
-    URLEncoder.encode(BytesHandler.getChars)
-    return ""
+    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            .apply {
+                init(1, keySpec, IvParameterSpec(IV.toByteArray()))
+            }
+    val chars = BytesHandler.getChars(cipher
+            .doFinal(param.toByteArray()))
+
+    return URLEncoder.encode(
+            String(chars),
+            "utf-8")
 }

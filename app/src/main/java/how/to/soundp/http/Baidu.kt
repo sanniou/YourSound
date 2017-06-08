@@ -15,6 +15,7 @@ import java.sql.Date
  *author : jichang
  *time   : 2017/06/07
  *desc   :
+ * 接口以及AES算法来自
  * https://github.com/aa112901/remusic/blob/master/app/src/main/java/com/wm/remusic/net/BMA.java
  *version: 1.0
  */
@@ -26,7 +27,7 @@ interface BaiduMusicApi {
         }
         val SUCCESS_CODE = 22000
         val API_FROM = "android"
-        val API_VERSION = "5.6.5.0"
+        val API_VERSION = "5.6.5.6"
         val API_FORMAT = "json"
         private val METHOD_GET_BILLLIST = "baidu.ting.billboard.billList"
         private val METHOD_GET_ADS = "baidu.ting.adv.showlist"
@@ -63,6 +64,7 @@ interface BaiduMusicApi {
         //pn=0&rn=50&bduss=UlXZ1dWbm9icDBrMm13aFcwZ282ejlTM1dyS1NEd2JPWXpQcDgyT0w0Vn5SUmhVQVFBQUFBJCQAAAAAAAAAAAEAAAB0L~cOeHl3MDQzNzM1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH-48FN~uPBTd
         private val METHOD_GET_ARTISTALUBMLIST = "baidu.ting.artist.getAlbumList"
         private val METHOD_QUERY_MERGE = "baidu.ting.search.merge"
+        private val METHOD_LEARM_SEARCH = "baidu.ting.learn.search"//伴奏
     }
 
 
@@ -207,11 +209,14 @@ interface BaiduMusicApi {
 
     /**
      * 获取歌曲信息
-     * songid=8059247&ts=1408284347323&e=JoN56kTXnnbEpd9MVczkYJCSx%2FE1mkLx%2BPMIkTcOEu4%3D&nw=2&ucf=1&res=1
+     * pass
      */
     @GET("/v1/restserver/ting")
     fun requestMusicInfo(
-            @Query("tinguid") artistId: Int,
+            @Query("songid") songId: Int,
+            @Query("ts") ts: Long = System.currentTimeMillis(),
+            // encoded 防止%转义
+            @Query("e", encoded = true) e: String = encrpty("songid=$songId&ts=$ts"),
             @Query("method") method: String = METHOD_GET_SONGINFO
     ): Flowable<ArtistInfo>
 

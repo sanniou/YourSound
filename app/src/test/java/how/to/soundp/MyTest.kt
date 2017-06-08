@@ -2,6 +2,7 @@ package how.to.soundp
 
 import how.to.soundp.http.BaiduMusicApi
 import io.reactivex.Flowable
+import okhttp3.Request
 import org.junit.Test
 import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
@@ -15,22 +16,28 @@ import org.reactivestreams.Subscription
  */
 class MyTest {
 
-    @Test
-    fun testGet() {
-        testBase(BaiduMusicApi.instance
-                .search("七里香"))
-    }
+//    @Test
+//    fun testGet() {
+//        testBase(BaiduMusicApi.instance
+//                .search("七里香"))
+//    }
+//
+//    @Test
+//    fun testCatalogSug() {
+//        testBase(BaiduMusicApi.instance
+//                .requestCatalogSug("七里香"))
+//    }
+//
+//    @Test
+//    fun testBillList() {
+//        testBase(BaiduMusicApi.instance
+//                .requestBillList(1))
+//    }
 
     @Test
-    fun testCatalogSug() {
+    fun testMusicInfo() {
         testBase(BaiduMusicApi.instance
-                .requestCatalogSug("七里香"))
-    }
-
-    @Test
-    fun testBillList() {
-        testBase(BaiduMusicApi.instance
-                .requestBillList(1))
+                .requestMusicInfo(354387))
     }
 
 
