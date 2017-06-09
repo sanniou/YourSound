@@ -1,4 +1,4 @@
-package how.to.soundp.http
+package http
 
 
 /**

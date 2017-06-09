@@ -6,4 +6,3 @@ package how.to.soundp.bean
  *desc   :
  *version: 1.0
  */
-data class ArtistAlbumListResp(val s:String)

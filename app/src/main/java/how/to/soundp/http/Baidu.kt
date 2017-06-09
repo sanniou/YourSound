@@ -9,6 +9,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Streaming
+import retrofit2.http.Url
 import java.sql.Date
 
 /**
@@ -23,47 +25,50 @@ import java.sql.Date
 interface BaiduMusicApi {
     companion object {
         val instance by lazy {
-            RetrofitFactory.create(BaiduMusicUtil.API_URL, BaiduMusicApi::class.java)
+            RetrofitFactory.create(API_URL, BaiduMusicApi::class.java)
         }
-        val SUCCESS_CODE = 22000
+        val API_URL = "http://tingapi.ting.baidu.com"
+        val SUCCESS_CODE = 22000L
         val API_FROM = "android"
         val API_VERSION = "5.6.5.6"
         val API_FORMAT = "json"
-        private val METHOD_GET_BILLLIST = "baidu.ting.billboard.billList"
-        private val METHOD_GET_ADS = "baidu.ting.adv.showlist"
+        private val METHOD_BILLBOARD_LIST = "baidu.ting.billboard.billList"
+        private val METHOD_ADS_LIST = "baidu.ting.adv.showlist"
         private val METHOD_SEARCH_CATALOGSUG = "baidu.ting.search.catalogSug"
         private val METHOD_SEARCH_SUGGESTION = "baidu.ting.search.suggestion"
         private val METHOD_SEARCH_COMMON = "baidu.ting.search.common"
         private val METHOD_SEARCH_HOT = "baidu.ting.search.hot"
+        private val METHOD_SEARCH_LRCPIC = "baidu.ting.search.lrcpic"
+        private val METHOD_SEARCH_MERGE = "baidu.ting.search.merge"
 
         private val METHOD_ARTIST_LIST = "baidu.ting.artist.getList" //order=1&offset=0&limit=5
         private val METHOD_ARTIST_HOT = "baidu.ting.artist.get72HotArtist"//order=1&offset=0&limit=50
         private val METHOD_ARTIST_INFO = "baidu.ting.artist.getinfo"
         private val METHOD_ARTIST_SONGLIST = "baidu.ting.artist.getSongList"
+        private val METHOD_ARTIST_ALUBMLIST = "baidu.ting.artist.getAlbumList"
 
         private val METHOD_RADIO_LIST = "baidu.ting.radio.getCategoryList" //电台列表
         private val METHOD_RADIO_Channel = "baidu.ting.radio.getRecChannel" //电台列表 pageNo   pageSize
         private val METHOD_RADIO_SONG = "baidu.ting.radio.getChannelSong" //获取某个电台下的歌曲列表
         //pn=0&rn=10&channelname=public_tuijian_ktv
         private val METHOD_RADIO_RECOMMEND = "baidu.ting.radio.getRecommendRadioList" // 推荐电台（注意返回的都是乐播节目)
-        private val METHOD_ALBUM_RECOMMEND = "baidu.ting.plaza.getRecommendAlbum"//新碟上架  offset=0&limit=50
-        private val METHOD_ALBUM_INFO = "baidu.ting.album.getAlbumInfo"
 
-        private val METHOD_SONG_NEW = "baidu.ting.plaza.getNewSongs" //新歌速递 limit=50
+        private val METHOD_PLAZA_ALBUM = "baidu.ting.plaza.getRecommendAlbum"//新碟上架  offset=0&limit=50
+        private val METHOD_PLAZA_SONGS = "baidu.ting.plaza.getNewSongs" //新歌速递 limit=50
+
+        private val METHOD_ALBUM_INFO = "baidu.ting.album.getAlbumInfo"
 
         private val METHOD_SONG_PLAY = "baidu.ting.song.play"
         private val METHOD_SONG_PLAYAAC = "baidu.ting.song.playAAC"
         private val METHOD_SONG_LRC = "baidu.ting.song.lry"
-        private val METHOD_GET_RECOMMAND = "baidu.ting.song.getRecommandSongList"
-        private val METHOD_GET_DOWNWEB = "baidu.ting.song.downWeb"
+        private val METHOD_SONG_RECOMMAND = "baidu.ting.song.getRecommandSongList"
+        private val METHOD_Song_DOWNWEB = "baidu.ting.song.downWeb"
+        private val METHOD_SONG_INFO = "baidu.ting.song.getInfos"
 
 
-        private val METHOD_SONG_LRCPIC = "baidu.ting.search.lrcpic"
-        private val METHOD_GET_SONGINFO = "baidu.ting.song.getInfos"
-        private val METHOD_GET_FAVORITE = "baidu.ting.favorite.getFavoriteSong" //获取登陆用户的喜爱歌曲列表，其中bduss参数用来标示唯一的用户
+
+        private val METHOD_FAVORITE_SONG = "baidu.ting.favorite.getFavoriteSong" //获取登陆用户的喜爱歌曲列表，其中bduss参数用来标示唯一的用户
         //pn=0&rn=50&bduss=UlXZ1dWbm9icDBrMm13aFcwZ282ejlTM1dyS1NEd2JPWXpQcDgyT0w0Vn5SUmhVQVFBQUFBJCQAAAAAAAAAAAEAAAB0L~cOeHl3MDQzNzM1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH-48FN~uPBTd
-        private val METHOD_GET_ARTISTALUBMLIST = "baidu.ting.artist.getAlbumList"
-        private val METHOD_QUERY_MERGE = "baidu.ting.search.merge"
         private val METHOD_LEARM_SEARCH = "baidu.ting.learn.search"//伴奏
     }
 
@@ -78,19 +83,19 @@ interface BaiduMusicApi {
      *  type=1&offset=0&size=50
      */
     @GET("/v1/restserver/ting")
-    fun requestBillList(
+    fun getBillList(
             @Query("type") type: Int,
             @Query("offset") offset: Int = 0,
             @Query("size") size: Int = 10,
-            @Query("method") method: String = METHOD_GET_BILLLIST
-    ): Flowable<ResponseBody>
+            @Query("method") method: String = METHOD_BILLBOARD_LIST
+    ): Flowable<BillboardP>
 
     /**
      * 获取推广广告
      */
     @GET("/v1/restserver/ting")
     fun requestAds(
-            @Query("method") method: String = METHOD_GET_ADS
+            @Query("method") method: String = METHOD_ADS_LIST
     ): Flowable<ResponseBody>
 
 
@@ -133,7 +138,7 @@ interface BaiduMusicApi {
      *  @param songId
      */
     @GET("/v1/restserver/ting")
-    fun requestSongInfo(
+    fun requestSongPlay(
             @Query("songid") songId: Int,
             @Query("method") method: String = METHOD_SONG_PLAY
     ): Flowable<SongPlayResp>
@@ -166,7 +171,7 @@ interface BaiduMusicApi {
     fun requestSongRecommand(
             @Query("songid") songId: Int,
             @Query("num") num: Int = 5,
-            @Query("method") method: String = METHOD_GET_RECOMMAND
+            @Query("method") method: String = METHOD_SONG_RECOMMAND
     ): Flowable<SongPlayResp>
 
     /**
@@ -180,7 +185,7 @@ interface BaiduMusicApi {
             @Query("songid") songId: Int,
             @Query("_t") date: Date,
             @Query("bit") bit: Int = 5,
-            @Query("method") method: String = METHOD_GET_DOWNWEB
+            @Query("method") method: String = METHOD_Song_DOWNWEB
     ): Flowable<SongPlayResp>
 
 
@@ -192,7 +197,7 @@ interface BaiduMusicApi {
     fun requestArtistInfo(
             @Query("tinguid") artistId: Int,
             @Query("method") method: String = METHOD_ARTIST_INFO
-    ): Flowable<ArtistInfo>
+    ): Flowable<Artist>
 
     /**
      * 获取歌手的歌曲列表
@@ -212,20 +217,20 @@ interface BaiduMusicApi {
      * pass
      */
     @GET("/v1/restserver/ting")
-    fun requestMusicInfo(
-            @Query("songid") songId: Int,
+    fun getSongInfo(
+            @Query("songid") songId: Long,
             @Query("ts") ts: Long = System.currentTimeMillis(),
             // encoded 防止%转义
             @Query("e", encoded = true) e: String = encrpty("songid=$songId&ts=$ts"),
-            @Query("method") method: String = METHOD_GET_SONGINFO
-    ): Flowable<ArtistInfo>
+            @Query("method") method: String = METHOD_SONG_INFO
+    ): Flowable<SongInfo>
 
     /**
      * 获取歌手的专辑列表
      */
     @GET("/v1/restserver/ting")
     fun requestAlbumByArtist(
-            @Query("method") method: String = METHOD_GET_ARTISTALUBMLIST,
+            @Query("method") method: String = METHOD_ARTIST_ALUBMLIST,
             @Query("order") order: Int = 1,
             @Query("tinguid") artistId: Int,
             @Query("offset") offset: Int = 0,
@@ -248,12 +253,19 @@ interface BaiduMusicApi {
     @GET("/v1/restserver/ting")
     fun search(
             @Query("query") keyword: String,
-            @Query("method") method: String = METHOD_QUERY_MERGE,
+            @Query("method") method: String = METHOD_SEARCH_MERGE,
             @Query("page_no") page: Int = 1,
             @Query("page_size") size: Int = 50,
             @Query("type") queryType: Int = -1,
             @Query("data_source") dataSource: Int = 0,
             @Query("use_cluster") useCluster: Int = 1): Flowable<QueryResult>
+
+    /**
+     * 下载
+     */
+    @Streaming
+    @GET
+    fun download(@Url url: String): Flowable<ResponseBody>
 }
 
 
@@ -277,24 +289,25 @@ object RetrofitFactory {
                             val response = it.proceed(request)
 
                             val t2 = System.nanoTime()
-                            val string = response.body()?.string()
+                            //val string = response.body()?.string()
                             println("============================\n" +
                                     "Received response for ${response.request().url()} \n" +
                                     "in ${(t2 - t1) / 1e6}ms\n" +
                                     "${response.headers()}\n" +
-                                    "$string\n" +
+                                    //"$string\n" +
                                     "============================\n"
                             )
-                            //response.body().string() 只能使用一次，需要重新创建 response
-                            response.newBuilder()
-                                    .body(ResponseBody.create(response.body()?.contentType(), string))
-                                    .build()
+                            //response.body().string() 只能使用一次，需要重新创建 response 导致okio 写入重复
+                            //response.newBuilder()
+                            //.body(ResponseBody.create(response.body()?.contentType(), string))
+                            //.build()
+                            response
                         }
                         .addInterceptor {
+                            println(it.request().url().host())
                             val httpUrl = it.request().url().run {
                                 newBuilder().scheme(scheme())
                                         .host(host())
-
                                         .addQueryParameter("from", BaiduMusicApi.API_FROM)
                                         .addQueryParameter("version", BaiduMusicApi.API_VERSION)
                                         .addQueryParameter("format", BaiduMusicApi.API_FORMAT)
@@ -315,15 +328,3 @@ object RetrofitFactory {
     }
 }
 
-/**
- * 使用百度音乐API的工具类
- */
-object BaiduMusicUtil {
-    val API_URL = "http://tingapi.ting.baidu.com"
-    /**
-     * 通过歌曲Id获取歌曲下载地址  同在线播放的地址
-     */
-    fun getDownloadUrlBySongId(songId: String): String {
-        return "http://ting.baidu.com/data/music/links?songIds=$songId"
-    }
-}

@@ -2,10 +2,11 @@ package how.to.soundp
 
 import how.to.soundp.http.BaiduMusicApi
 import io.reactivex.Flowable
-import okhttp3.Request
+import okio.Okio
+import org.junit.Rule
 import org.junit.Test
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
+import org.junit.rules.TemporaryFolder
+import java.io.File
 
 
 /**
@@ -15,56 +16,55 @@ import org.reactivestreams.Subscription
  *version: 1.0
  */
 class MyTest {
-
-//    @Test
-//    fun testGet() {
-//        testBase(BaiduMusicApi.instance
-//                .search("七里香"))
-//    }
-//
-//    @Test
-//    fun testCatalogSug() {
-//        testBase(BaiduMusicApi.instance
-//                .requestCatalogSug("七里香"))
-//    }
-//
-//    @Test
-//    fun testBillList() {
-//        testBase(BaiduMusicApi.instance
-//                .requestBillList(1))
-//    }
+    @Rule
+    @JvmField var temporaryFolder = TemporaryFolder()
 
     @Test
-    fun testMusicInfo() {
+    fun testStart() {
+//        testBillList()
         testBase(BaiduMusicApi.instance
-                .requestMusicInfo(354387))
+                .getSongInfo(541680641)) {
+            println(it)
+        }
+    }
+
+    fun testBillList() {
+        testBase(BaiduMusicApi.instance
+                .getBillList(1)) {
+            val sid = it.song_list[0].song_id
+            println(sid)
+            testSongInfo(sid)
+        }
+    }
+
+    fun testSongInfo(sid: Long) {
+        testBase(BaiduMusicApi.instance
+                .getSongInfo(sid)) {
+            val link = it.songurl.url.first().file_link
+            print(link)
+            testDownload(link)
+        }
+    }
+
+    fun testDownload(link: String) {
+        testBase(BaiduMusicApi.instance
+                .download(link)) {
+            body ->
+            //val newFile = temporaryFolder.newFile("sss")
+            val newFile = File("D:\\asdfas.mp3")
+            val sink = Okio.buffer(Okio.sink(newFile))
+            sink.use {
+                it.writeAll(body.source())
+            }
+            println(newFile.path + newFile.length())
+        }
     }
 
 
-    fun <T> testBase(flowable: Flowable<T>) {
+    fun <T> testBase(flowable: Flowable<T>, block: (T) -> Unit) {
         flowable.doOnCancel { System.out.println("OnCancel") }
                 .doOnSubscribe { System.out.println("OnSubscribe-flowable") }
-                .subscribe(object : Subscriber<T> {
-                    override fun onError(t: Throwable?) {
-                        System.out.println("onError$t")
-                    }
-
-                    override fun onNext(t: T?) {
-                        System.out.println("onNext $t")
-
-                    }
-
-                    override fun onComplete() {
-                        System.out.println("onComplete")
-
-                    }
-
-                    override fun onSubscribe(s: Subscription?) {
-                        System.out.println("onSubscribe-Subscriber")
-                        s?.request(1)
-
-                    }
-                })
+                .subscribe(block)
     }
 
 

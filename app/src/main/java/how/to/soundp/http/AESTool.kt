@@ -1,5 +1,6 @@
 package how.to.soundp.http
 
+import http.BytesHandler
 import java.net.URLEncoder
 import java.security.MessageDigest
 import javax.crypto.Cipher

@@ -6,4 +6,4 @@ package how.to.soundp.bean
  *desc   :
  *version: 1.0
  */
-data class Album(val s:String)
+data class Album(val error_code: Long)
